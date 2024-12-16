@@ -1,0 +1,92 @@
+2.1 Kubernetes Architecture
+- The purpose of Kubernestes is host application  in the form of container 
+ + easy to deploy and scale up/ down
+ + communication 
+
+- 2 kind of ships: Carry container across the sea
+                   Control ship for monitoring and managing the carring ship
+- Kubernetes Architecture consist of set of NODE(Physical/ Vitual - OnPremise/ Cloud) That host application in the form of container
+-> WORKER NODE is the ship can load the container. Somebody need to load container to the ship and plan to load, id the ship, store info of the ship,monitor and track location of the ship> THAT CONTROL SIP - CONTROLPLAIN is the master node in kubenetes cluster
+
+Control plain:
+- load and unload ship: ETCD CLUSTER : storage DB about infomation of the ship
+- cranes: identify the containers place on the right ship -> KUBE-SCHEDULER
+- operation: traffic control and communication : CONTROLER MANAGER(Node-Controller and Replication -Controller) new node availabe, destroy a node, number o repl
+- communication each other : KUBE-APISERVER -primary management component of Kubernetes. orchestrating all operation within the cluster - connect CONTROLER MANAGER, KUBE-SCHEDULER, ETCD CLUSTER 
+- need the software can run container -> this is DOCKER make container become runtime engine. Make sure DOCKER was installed in all the node of cluster-> Kubernetes also support other CONTAINER RUNTIME - ContainerD or Rocket
+- Captain of the ship: KUBELET in Kubernetes: status of NODE or status of container -> AGENT run on each NODE --> Listen to the instruction of KUBE-APISERVER, deploy and destroy container on the node as required
+- NEED application communication each other in node: KUBE-PROXY
+
+2.2 What's the difference between Docker and ContainerD
+Docker begin - Tool RKT
+Kubernetes build for Docker 
+CRI of kubenetes - create from standard OCI
+Kubernetes <-> CRI <-> RKT(tool)  + ContainerD(Demon)
+-> tool to control, manage the DOCKER 
+
+
+2.3 ETCD: key value -> YAML and JSON -> etcdctl version (2 kind of version etcdctrl version and api support ) 2379 port
+2.4 ETCD Cluster: node, pod, config, role
+  - run command kubectl -> infomation from ETCD CLUSTER
+  - every change you make to your cluster, save to etcd -> change to 
+status to commpleted
+2 kind of deployments: from scratch 
+                       using the Qadium tool
+From scratch: config etcd as a service in your master node
+              certificate-TLS
+			  advertised client-url IPserver 2379
+kubeadm 
+kubectl get pods -n kube-system
+kubectl exec etcd-master -n kube-system etcdctl get / --prefix -keys-only
+HA Environment > need config etcd.service "initial-cluster controlller-0=https://${controller0_IP}:2380,controller-1=https://${controller1_IP}:2380"
+
+KUBE-APISERVER:
+When typing kubectl command to create a new Pod
+Kube-ApiServer will do: - Authenticate User
+						- Validate Request
+						- Retrieve Data From ETCD
+						- Update ETCD
+						- KUBE-SCHEDULER: continuosly monitor APISERVER and find new pod create with no NODE assigned
+						                  identify the right node to place the new pod on
+										  communicate back to APISERVER
+										  APISERVER update etcd cluster
+						- Pass this infomation to the KUBELET in appropriate worker node, KUBELET create pod on the NODE, contruct runtime engine to deploy application image to the POD, updade back to APISERVER
+						APISERVER update ETCD Cluster
+
+CONTROLER-MANAGER
+like the office and department for monitoring and takin necessary actions about the ship, when ship arrive and leaves or get destroy- status of ship
+Watch status bring whole system to funtionaly
+Remediate Situation
+Note Controller:
+Node Monitor Period 5s check health of node
+Node Monitor Grace Period 40s -> wait 40s before marking it nreachable
+POD Eviction Timeout unreachable status still keep  for 5 min -. It will be not assigned to this POD, and provicion a health one 
+Replication Controller: make sure the number of pods availabe at all time with this set
+And many controller : Deployment - Namespace - Endpoint - CronJob - PV- PV Binder - > THE BRAIN 
+kube-controller-manager.service > config as service
+kubectl get pods -n kube-system
+cat /etc/kubernetes/manifests/kube-controler-manager.yaml
+grep -aux | grep kube-controller-manager
+
+KUBE-SCHEDULER:
+decide with pod goes on which node
+not place the pod to node (KUBELET)
+
+make sufficient capacity (CPU, MEM)
+assigned pod find the best node
+1- filter NODES
+2- Rank NODE - free capacity after assigned
+cat /etc/kubernetes/manifests/kube-scheduler.yaml
+
+KUBELET: caption on the ship (NODE) load and unload container
+- register node to master
+- Create PODS
+- Monitor Node and PODS
+
+"Kubeadm does not deploy KUBELET" -> manual installer in NODE, download and extract it
+
+
+
+
+  
+
