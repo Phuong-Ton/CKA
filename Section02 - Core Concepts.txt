@@ -1,15 +1,18 @@
 2.1 Kubernetes Architecture
-- The purpose of Kubernestes is host application  in the form of container 
+- The purpose of Kubernestes is host application as container 
  + easy to deploy and scale up/ down
  + communication 
 
 - 2 kind of ships: Carry container across the sea
                    Control ship for monitoring and managing the carring ship
+
 - Kubernetes Architecture consist of set of NODE(Physical/ Vitual - OnPremise/ Cloud) That host application in the form of container
--> WORKER NODE is the ship can load the container. Somebody need to load container to the ship and plan to load, id the ship, store info of the ship,monitor and track location of the ship> THAT CONTROL SIP - CONTROLPLAIN is the master node in kubenetes cluster
+-> WORKER NODE is the ship can load the container. 
+
+Somebody need to load container to the ship and plan to load, id the ship, store info of the ship,monitor and track location of the ship> THAT CONTROL SIP - CONTROLPLAIN is the master node in kubenetes cluster
 
 Control plain:
-- load and unload ship: ETCD CLUSTER : storage DB about infomation of the ship
+- ETCD CLUSTER : storage DB about infomation of the ship
 - cranes: identify the containers place on the right ship -> KUBE-SCHEDULER
 - operation: traffic control and communication : CONTROLER MANAGER(Node-Controller and Replication -Controller) new node availabe, destroy a node, number o repl
 - communication each other : KUBE-APISERVER -primary management component of Kubernetes. orchestrating all operation within the cluster - connect CONTROLER MANAGER, KUBE-SCHEDULER, ETCD CLUSTER 
@@ -19,10 +22,59 @@ Control plain:
 
 2.2 What's the difference between Docker and ContainerD
 Docker begin - Tool RKT
+
+
 Kubernetes build for Docker 
 CRI of kubenetes - create from standard OCI
 Kubernetes <-> CRI <-> RKT(tool)  + ContainerD(Demon)
 -> tool to control, manage the DOCKER 
+
+
+
+
+kubectl → API Server → Kubelet → CRI → Container Runtime (Containerd or CRI-O) → Container
+Breaking it Down
+1️ ⃣ kubectl (CLI)
+You send a command (e.g., kubectl run nginx --image=nginx).
+This request goes to the Kubernetes API Server.
+
+2 ️⃣ Kubernetes API Server
+The API server processes the request and schedules a pod on a worker node.
+
+3 ️⃣ Kubelet (Node Agent)
+The Kubelet runs on each node and is responsible for managing pods and containers.
+Kubelet does NOT talk to Containerd directly—instead, it uses CRI.
+
+4 ️⃣ CRI (Container Runtime Interface)
+CRI is an abstraction layer that allows Kubernetes to use different container runtimes (like Containerd or CRI-O).
+The Kubelet sends commands to the container runtime using CRI.
+
+5 ️⃣ Container Runtime (e.g., Containerd)
+Containerd receives the request via CRI and:
+✅ Pulls the container image
+✅ Creates and runs the container
+
+6️ ⃣ Container (Running Application)
+The container is now running inside a Kubernetes pod.
+
+
+Why CRI Exists?
+Before CRI, Kubernetes only supported Docker, but now it can support multiple runtimes like:
+Containerd (default runtime for Kubernetes)
+CRI-O (lightweight alternative for Kubernetes)
+This makes Kubernetes more flexible and not dependent on Docker.
+
+Kubernetes now uses Containerd or CRI-O as the runtime
+Docker is still useful for building container images 🛠️.
+
+
+Containerd is a general-purpose container runtime that Kubernetes, Docker, and other platforms can use.
+CRI-O is a Kubernetes-specific runtime, designed to be minimal and efficient for Kubernetes workloads only.
+
+
+
+
+https://www.youtube.com/live/9lWa_VawxB8
 
 
 2.3 ETCD: key value -> YAML and JSON -> etcdctl version (2 kind of version etcdctrl version and api support ) 2379 port
@@ -68,7 +120,7 @@ kubectl get pods -n kube-system
 cat /etc/kubernetes/manifests/kube-controler-manager.yaml
 grep -aux | grep kube-controller-manager
 
-KUBE-SCHEDULER:
+18.KUBE-SCHEDULER:
 decide with pod goes on which node
 not place the pod to node (KUBELET)
 
@@ -78,14 +130,70 @@ assigned pod find the best node
 2- Rank NODE - free capacity after assigned
 cat /etc/kubernetes/manifests/kube-scheduler.yaml
 
-KUBELET: caption on the ship (NODE) load and unload container
+19.KUBELET: caption on the ship (NODE) load and unload container
 - register node to master
 - Create PODS
 - Monitor Node and PODS
-
 "Kubeadm does not deploy KUBELET" -> manual installer in NODE, download and extract it
 
 
+20.KUBE PROXY - network solution
+POD network solution every pod can reach the other pod is accomplished by deploying a pod network solution to the cluster kubenetes.
+this is a internal vitual network 
+WEB(Pod1) --- DB(Pod2)
+ web using service for web access the db server : IP:192.168.0.1
+ The service can not join the pod network, because this is not actual thing(no interface, this is vitual component in memory
+Kube-roxy is a process that run on each node, it's job is to look for new services. when new service create, it creates the appropriate rule on each node to FORWARD traffic to BACKEND  - mapping ip of service to IP of node
+
+kubectl get pods -n kube-system
+kubectl get daemonset -n kube-system
+
+21. POP
+the containers are encapsulated into kubenetes object known as PODS
+single instance of application
+a single node with a single instance of your application running in a single Docker container encapsulated in a pod
+Users are increase and you need to scale your application -> add new instance of your application to share the load -> create a new pod
+POD have one-to-one relationship with the container but there is Helper container -> also exist and also die
+
+kubectl run nginx --image nginx
+kubectl get pods
+
+User can not access directly from the NODE -> create a service for end user accesstable 
+22. POP YAML
+yaml file is an input for create the pod, replica, deploy, service, et cetera.
+kubectl get pod
+kubectl run nginx --image nginx
+kubectl get pod
+
+kubectl describe pod newpods-8ptft
+kubectl get node
+kubectl get pod
+kubectl describe pod webapp
+kubectl get pod webapp
+kubectl get pods
+kubectl delete pod webapp
+kubectl get pods 
+kubectl run redis --image=redis123 --dry-run=client -o yaml > redis-definition.yaml
+cat redis-definition.yaml
+-------------------------------------
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: redis
+  name: redis
+spec:
+  containers:
+  - image: redis123
+    name: redis
+-------------------------------------
+Fix Image with 2 ways:
+■ kubectl edit pod redis
+■ kubectl apply -f redis-definition.yaml
+
+
+
+ 
 
 
   
