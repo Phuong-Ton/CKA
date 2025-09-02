@@ -1,0 +1,45 @@
+    1  kubectl get nodes
+    2  kubectl get nodes node01
+    3  kubectl get describe node node01
+    4  kubectl describe node node01
+    5  kubectl describe node node01 | grep -i taints
+    6  kubectl taint nodes node01 spray:mortein=NoSchedule
+    7  kubectl taint -h
+    8  kubectl taint nodes node01 spray=mortein:NoSchedule
+    9  kubectl describe node node01 | grep -i taints
+   10  kubectl run -h
+   11  kubectl run mosquito --image=nginx
+   12  kubectl get pos mosquito
+   13  kubectl get pod mosquito
+   14  kubectl get nodes
+   15  kubectl get pod mosquito
+   16  kubectl get pod -h
+   17  vi
+   18  vi node_tolerations.yaml
+   19  kubectl create -f node_tolerations.yaml 
+   20  kubectl get pod -h
+   21  kubectl get pods
+   22  kubectl get nodes
+   23  kubectl get pods -o wide
+   24  kubectl describe node node01 | grep taint
+   25  kubectl describe node node01 
+   26  kubectl describe node node01 | grep -i taints
+   27  kubectl describe pod mo
+   28  kubectl describe pod mo |grep toleration
+   29  kubectl describe pod mo |grep -i toleration
+   30  kubectl describe pod bee |grep -i toleration
+   31  kubectl get pods
+   32  kubectl describe pod nginx |grep -i toleration
+   33  kubectl describe pod nginx 
+   34  kubectl delete pod nginx
+   35  vi node_tolerations.yaml 
+   36  kubectl create -f node_tolerations.yaml 
+   37  kubectl get pods
+   38  kubectl describe pod bee |grep -i toleration
+   39  kubectl describe node controlplane | grep -i taints
+   40  kubectl taint nodes -h
+   43  kubectl taint nodes controlplane node-role.kubernetes.io/control-plane:NoSchedule-
+   44  kubectl describe node controlplane | grep -i taints
+   45  kubectl get pods
+   46  kubectl get pod -o wide
+   47  history
